@@ -56,9 +56,9 @@ func tapeWriteBlocks(blocks map[uint64][]sqlPackageToTapeStruct, lastRecordNo ui
 
 			var blockWriteHandler *os.File
 			blockSize := calculateBlockSize(files) // вычисляем размер блока
-			bar := pb.New(blockSize).SetUnits(pb.U_BYTES)
-			bar.ShowTimeLeft = true
-			bar.ShowSpeed = true
+			bar := pb.New(blockSize)//.SetUnits(pb.U_BYTES)
+			//bar.ShowTimeLeft = true
+			//bar.ShowSpeed = true
 			bar.Start()
 
 			if config.testMode {
@@ -71,7 +71,7 @@ func tapeWriteBlocks(blocks map[uint64][]sqlPackageToTapeStruct, lastRecordNo ui
 				checkErrWithComment(err, "[tapeWriteBlocks] error while open tape device for writing")
 				// checkerr(err)
 			}
-			blockWriteHandlerBar := io.MultiWriter(blockWriteHandler, bar)
+			blockWriteHandlerBar := io.MultiWriter(blockWriteHandler)//, bar)
 
 			// blockWriteHandlerBuffer := bufio.NewWriter(blockWriteHandlerBar) // создаем буфер записи файла блока
 			blockWriteHandlerBuffer := bufio.NewWriterSize(blockWriteHandlerBar, config.bufioSize) // создаем буфер записи файла блока
@@ -209,14 +209,14 @@ func tapeReadBlocks(blocks map[uint64][]uint64, tapeNo uint64) bool {
 func tarRead(tarReader *tar.Reader, uid string, size int64) bool {
 	log.Printf("[tarRead] uid: %s", uid)
 
-	bar := pb.New(int(size)).SetUnits(pb.U_BYTES)
-	bar.ShowTimeLeft = true
-	bar.ShowSpeed = true
+	bar := pb.New(int(size))//.SetUnits(pb.U_BYTES)
+	//bar.ShowTimeLeft = true
+	//bar.ShowSpeed = true
 	bar.Start()
 
 	fw, err := os.Create(config.cachePath + uid)
 	checkErrWithComment(err, "[tarRead] create file in cache")
-	fwBar := io.MultiWriter(fw, bar)
+	fwBar := io.MultiWriter(fw)//, bar)
 	// checkerr(err)
 	fw_buff_handle := bufio.NewWriterSize(fwBar, config.bufioSize)
 	// fw_buff_handle := bufio.NewWriter(fw)
@@ -291,7 +291,7 @@ func tapeLoad(tapeNumber uint64) bool {
 		checkerr(err)
 	}
 
-	rb := bufio.NewReader(r)
+	rb := bufio.NewReaderSize(r, 64*1024)
 	readbuf := make([]byte, 128)
 	// var readbuflen int
 	readbuf, _, err = rb.ReadLine()
